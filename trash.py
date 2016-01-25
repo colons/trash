@@ -125,7 +125,9 @@ def process_title(title):
 
 
 def get_tweet():
-    return choice(TWEETS).replace('<anime>', process_title(get_title()))
+    return choice(TWEETS).replace(
+        '<anime>', process_title(get_title())
+    ).lower()
 
 
 if __name__ == '__main__':
