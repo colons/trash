@@ -62,10 +62,6 @@ with open(os.path.join(os.path.dirname(__file__), 'tweet.txt')) as tf:
     ]
 
 
-def remove_year(title):
-    return re.sub(r'\s+\(\d{4}\)$', '', title)
-
-
 def get_airing():
     airing = anilist.browse(status='Currently Airing', full_page=True)
     threshold = datetime.utcnow().replace(tzinfo=utc) - timedelta(days=365)
@@ -98,8 +94,38 @@ def get_title():
     return func()['title_english']
 
 
+def add_the(title):
+    flags = re.IGNORECASE
+    if re.match(
+        r'.*\s+(ONA|OVA|Movie)$',
+        title,
+        flags=flags
+    ) and not re.match(
+        r'The.*',
+        title,
+        flags=flags
+    ):
+        return u'the {}'.format(title)
+
+    return title
+
+
+def remove_year(title):
+    return re.sub(r'\s+\(\d{4}\)$', '', title)
+
+
+def process_title(title):
+    for func in [
+        remove_year,
+        add_the,
+    ]:
+        title = func(title)
+
+    return title
+
+
 def get_tweet():
-    return choice(TWEETS).replace('<anime>', get_title())
+    return choice(TWEETS).replace('<anime>', process_title(get_title()))
 
 
 if __name__ == '__main__':
