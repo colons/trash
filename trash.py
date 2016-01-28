@@ -1,5 +1,6 @@
 from time import time
 from datetime import datetime, timedelta
+from subprocess import check_output
 import os
 import re
 
@@ -56,7 +57,7 @@ anilist = Anilist(client_id, client_secret)
 
 
 with open(os.path.join(os.path.dirname(__file__), 'tweet.txt')) as tf:
-    TWEETS = [
+    TEMPLATES = [
         t.strip()
         for t in tf.readlines()
     ]
@@ -124,10 +125,36 @@ def process_title(title):
     return title
 
 
+def sub_titles(template):
+    return re.sub(
+        re.escape('<anime>'),
+        lambda m: process_title(get_title()),
+        template,
+    )
+
+
+def add_typos(tweet):
+    return check_output([
+        'perl',
+        os.path.join(os.path.dirname(__file__), 'typo.pl'),
+        tweet,
+    ]).replace('\n', '')
+
+
+def process_tweet(tweet):
+    for func in [
+        sub_titles,
+        add_typos,
+        lambda t: t.lower(),
+    ]:
+        tweet = func(tweet)
+
+    return tweet
+
+
 def get_tweet():
-    return choice(TWEETS).replace(
-        '<anime>', process_title(get_title())
-    ).lower()
+    template = choice(TEMPLATES)
+    return process_tweet(template)
 
 
 if __name__ == '__main__':
