@@ -4,7 +4,7 @@ from subprocess import check_output
 import os
 import re
 
-from random import choice
+from random import choice, random
 
 from dateutil.parser import parse as dateparse
 from pytz import utc
@@ -134,11 +134,17 @@ def sub_titles(template):
 
 
 def add_typos(tweet):
-    return check_output([
-        'perl',
-        os.path.join(os.path.dirname(__file__), 'typo.pl'),
-        tweet,
-    ]).replace('\n', '')
+    i = 1
+
+    while i > random():
+        i *= 0.7
+        tweet = check_output([
+            'perl',
+            os.path.join(os.path.dirname(__file__), 'typo.pl'),
+            tweet,
+        ]).replace('\n', '')
+
+    return tweet
 
 
 def process_tweet(tweet):
